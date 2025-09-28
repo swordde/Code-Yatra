@@ -1,0 +1,699 @@
+// Register GSAP plugins
+gsap.registerPlugin(ScrollTrigger, TextPlugin);
+
+// Global variables
+let isLoaded = false;
+const tl = gsap.timeline();
+
+// DOM Content Loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initLoader();
+    initNavigation();
+    initSmoothScroll();
+    initAnimations();
+    initCounters();
+    initContactForm();
+    initParallax();
+});
+
+// Loading Screen Animation
+function initLoader() {
+    const loader = document.getElementById('loader');
+    const progressBar = document.querySelector('.progress');
+    const logoSymbol = document.querySelector('.loader-logo-symbol');
+    const logoText = document.querySelector('.logo-animation h1');
+    
+    // Animate logo
+    const logoTl = gsap.timeline();
+    logoTl
+        .fromTo(logoSymbol, 
+            { opacity: 0, y: 50, scale: 0.8 },
+            { opacity: 1, y: 0, scale: 1, duration: 1, ease: "back.out(1.7)" }
+        )
+        .fromTo(logoText, 
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration: 0.8, ease: "power2.out" }, "-=0.3"
+        );
+    
+    // Animate progress bar
+    gsap.to(progressBar, {
+        width: '100%',
+        duration: 2.5,
+        ease: "power2.inOut",
+        onComplete: function() {
+            // Hide loader and show content
+            gsap.to(loader, {
+                opacity: 0,
+                duration: 0.5,
+                onComplete: function() {
+                    loader.style.display = 'none';
+                    isLoaded = true;
+                    initHeroAnimations();
+                }
+            });
+        }
+    });
+}
+
+// Navigation functionality
+function initNavigation() {
+    const navbar = document.getElementById('navbar');
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('nav-menu');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    // Mobile menu toggle
+    hamburger.addEventListener('click', function() {
+        hamburger.classList.toggle('active');
+        navMenu.classList.toggle('active');
+    });
+    
+    // Close mobile menu when clicking on links
+    navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            hamburger.classList.remove('active');
+            navMenu.classList.remove('active');
+        });
+    });
+    
+    // Navbar background on scroll
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 50) {
+            navbar.style.background = 'rgba(10, 10, 10, 0.98)';
+            navbar.style.backdropFilter = 'blur(10px)';
+        } else {
+            navbar.style.background = 'rgba(10, 10, 10, 0.98)';
+        }
+    });
+    
+    // Active navigation link
+    const sections = document.querySelectorAll('section');
+    
+    window.addEventListener('scroll', function() {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            if (scrollY >= (sectionTop - 200)) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + current) {
+                link.classList.add('active');
+            }
+        });
+    });
+}
+
+// Smooth scrolling for navigation links
+function initSmoothScroll() {
+    const navLinks = document.querySelectorAll('a[href^="#"]');
+    
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+                const offsetTop = targetElement.offsetTop - 70;
+                
+                gsap.to(window, {
+                    duration: 1,
+                    scrollTo: { y: offsetTop, autoKill: false },
+                    ease: "power2.inOut"
+                });
+            }
+        });
+    });
+}
+
+// Hero section animations
+function initHeroAnimations() {
+    const heroTimeline = gsap.timeline();
+    
+    // Animate hero logo and text elements
+    heroTimeline
+        .from('.hero-logo-symbol', {
+            duration: 1.2,
+            y: 50,
+            opacity: 0,
+            scale: 0.8,
+            ease: "back.out(1.7)"
+        })
+        .from('.hero-logo-text', {
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            ease: "power3.out"
+        }, "-=0.6")
+        .from('.subtitle-line', {
+            duration: 0.8,
+            y: 30,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "power2.out"
+        }, "-=0.4")
+        .from('.hero-description', {
+            duration: 0.8,
+            y: 30,
+            opacity: 0,
+            ease: "power2.out"
+        }, "-=0.3")
+        .from('.hero-buttons', {
+            duration: 0.8,
+            y: 30,
+            opacity: 0,
+            ease: "power2.out"
+        }, "-=0.3")
+        .from('.code-animation', {
+            duration: 1,
+            scale: 0.8,
+            opacity: 0,
+            ease: "back.out(1.7)"
+        }, "-=0.8")
+        .from('.code-line', {
+            duration: 0.5,
+            x: -20,
+            opacity: 0,
+            stagger: 0.1,
+            ease: "power2.out"
+        }, "-=0.3")
+        .from('.scroll-indicator', {
+            duration: 0.8,
+            y: 20,
+            opacity: 0,
+            ease: "power2.out"
+        }, "-=0.2");
+    
+    // Floating icons animation
+    gsap.set('.floating-icon', { opacity: 0, scale: 0 });
+    gsap.to('.floating-icon', {
+        opacity: 0.7,
+        scale: 1,
+        duration: 1,
+        stagger: 0.2,
+        ease: "back.out(1.7)",
+        delay: 2
+    });
+}
+
+// Initialize scroll-triggered animations
+function initAnimations() {
+    // Fade in elements
+    gsap.utils.toArray('.fade-in').forEach(element => {
+        gsap.fromTo(element, {
+            opacity: 0,
+            y: 50
+        }, {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: element,
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play none none reverse"
+            }
+        });
+    });
+    
+    // Fade in from left
+    gsap.utils.toArray('.fade-in-left').forEach(element => {
+        gsap.fromTo(element, {
+            opacity: 0,
+            x: -50
+        }, {
+            opacity: 1,
+            x: 0,
+            duration: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: element,
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play none none reverse"
+            }
+        });
+    });
+    
+    // Fade in from right
+    gsap.utils.toArray('.fade-in-right').forEach(element => {
+        gsap.fromTo(element, {
+            opacity: 0,
+            x: 50
+        }, {
+            opacity: 1,
+            x: 0,
+            duration: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: element,
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play none none reverse"
+            }
+        });
+    });
+    
+    // Scale in elements
+    gsap.utils.toArray('.scale-in').forEach(element => {
+        gsap.fromTo(element, {
+            opacity: 0,
+            scale: 0.8
+        }, {
+            opacity: 1,
+            scale: 1,
+            duration: 1,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+                trigger: element,
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play none none reverse"
+            }
+        });
+    });
+    
+    // Section title animations
+    gsap.utils.toArray('.section-title').forEach(title => {
+        gsap.fromTo(title, {
+            opacity: 0,
+            y: 30
+        }, {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: title,
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play none none reverse"
+            }
+        });
+    });
+    
+    // About cards stagger animation
+    gsap.fromTo('.about-card', {
+        opacity: 0,
+        y: 50,
+        scale: 0.9
+    }, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+            trigger: '.about-text',
+            start: "top 70%",
+            end: "bottom 30%",
+            toggleActions: "play none none reverse"
+        }
+    });
+    
+    // Service cards animation
+    gsap.fromTo('.service-card', {
+        opacity: 0,
+        y: 50,
+        rotationY: 15
+    }, {
+        opacity: 1,
+        y: 0,
+        rotationY: 0,
+        duration: 1,
+        stagger: 0.15,
+        ease: "power3.out",
+        scrollTrigger: {
+            trigger: '.services-grid',
+            start: "top 70%",
+            end: "bottom 30%",
+            toggleActions: "play none none reverse"
+        }
+    });
+    
+    // Project cards animation
+    gsap.fromTo('.project-card', {
+        opacity: 0,
+        y: 50,
+        scale: 0.9
+    }, {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "back.out(1.7)",
+        scrollTrigger: {
+            trigger: '.projects-grid',
+            start: "top 70%",
+            end: "bottom 30%",
+            toggleActions: "play none none reverse"
+        }
+    });
+    
+    // Contact section animation
+    gsap.fromTo('.contact-content', {
+        opacity: 0,
+        y: 50
+    }, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power2.out",
+        scrollTrigger: {
+            trigger: '.contact',
+            start: "top 70%",
+            end: "bottom 30%",
+            toggleActions: "play none none reverse"
+        }
+    });
+}
+
+// Animated counters
+function initCounters() {
+    const counters = document.querySelectorAll('.stat-number');
+    
+    counters.forEach(counter => {
+        const target = parseInt(counter.getAttribute('data-count'));
+        
+        gsap.fromTo(counter, {
+            innerHTML: 0
+        }, {
+            innerHTML: target,
+            duration: 2,
+            ease: "power2.out",
+            snap: { innerHTML: 1 },
+            scrollTrigger: {
+                trigger: counter,
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play none none reverse"
+            }
+        });
+    });
+}
+
+// Contact form functionality
+function initContactForm() {
+    const contactForm = document.getElementById('contactForm');
+    
+    contactForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = new FormData(contactForm);
+        const formObject = {};
+        formData.forEach((value, key) => {
+            formObject[key] = value;
+        });
+        
+        // Animate submit button
+        const submitButton = contactForm.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        
+        gsap.to(submitButton, {
+            scale: 0.95,
+            duration: 0.1,
+            yoyo: true,
+            repeat: 1,
+            ease: "power2.inOut"
+        });
+        
+        submitButton.innerHTML = 'Sending...';
+        submitButton.disabled = true;
+        
+        // Simulate form submission
+        setTimeout(() => {
+            submitButton.innerHTML = 'Message Sent! ✓';
+            submitButton.style.background = 'linear-gradient(135deg, #06d6a0 0%, #118ab2 100%)';
+            
+            // Reset form after 2 seconds
+            setTimeout(() => {
+                contactForm.reset();
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+                submitButton.style.background = '';
+            }, 2000);
+        }, 1500);
+    });
+    
+    // Form field animations
+    const formInputs = document.querySelectorAll('.form-group input, .form-group textarea');
+    
+    formInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            gsap.to(this, {
+                scale: 1.02,
+                duration: 0.3,
+                ease: "power2.out"
+            });
+        });
+        
+        input.addEventListener('blur', function() {
+            gsap.to(this, {
+                scale: 1,
+                duration: 0.3,
+                ease: "power2.out"
+            });
+        });
+    });
+}
+
+// Parallax effects
+function initParallax() {
+    // Hero parallax effect
+    gsap.to('.floating-elements', {
+        yPercent: -50,
+        ease: "none",
+        scrollTrigger: {
+            trigger: '.hero',
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true
+        }
+    });
+    
+    // Section backgrounds parallax
+    gsap.utils.toArray('.about, .projects').forEach(section => {
+        gsap.to(section, {
+            yPercent: -20,
+            ease: "none",
+            scrollTrigger: {
+                trigger: section,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+    });
+}
+
+// Mouse move effects
+document.addEventListener('mousemove', function(e) {
+    const mouseX = e.clientX / window.innerWidth;
+    const mouseY = e.clientY / window.innerHeight;
+    
+    // Floating icons follow mouse
+    gsap.to('.floating-icon', {
+        x: mouseX * 20,
+        y: mouseY * 20,
+        duration: 2,
+        ease: "power2.out",
+        stagger: 0.1
+    });
+    
+    // Code animation slight movement
+    gsap.to('.code-animation', {
+        rotationY: (mouseX - 0.5) * 10,
+        rotationX: (mouseY - 0.5) * -10,
+        duration: 1,
+        ease: "power2.out"
+    });
+});
+
+// Button hover effects
+document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('mouseenter', function() {
+        gsap.to(this, {
+            scale: 1.05,
+            duration: 0.3,
+            ease: "power2.out"
+        });
+    });
+    
+    button.addEventListener('mouseleave', function() {
+        gsap.to(this, {
+            scale: 1,
+            duration: 0.3,
+            ease: "power2.out"
+        });
+    });
+});
+
+// Card hover effects
+document.querySelectorAll('.service-card, .project-card, .about-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        gsap.to(this, {
+            y: -10,
+            duration: 0.3,
+            ease: "power2.out"
+        });
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        gsap.to(this, {
+            y: 0,
+            duration: 0.3,
+            ease: "power2.out"
+        });
+    });
+});
+
+// Typing animation for hero code
+function initTypingAnimation() {
+    const codeLines = document.querySelectorAll('.code-line');
+    const texts = [
+        'function codeYatra() {',
+        '  return "Amazing experiences";',
+        '};'
+    ];
+    
+    codeLines.forEach((line, index) => {
+        gsap.to(line, {
+            text: texts[index],
+            duration: 1,
+            delay: index * 0.5 + 3,
+            ease: "none"
+        });
+    });
+}
+
+// Initialize typing animation after page load
+window.addEventListener('load', function() {
+    setTimeout(initTypingAnimation, 2000);
+});
+
+// Scroll progress indicator
+function initScrollProgress() {
+    const progressBar = document.createElement('div');
+    progressBar.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0%;
+        height: 3px;
+        background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+        z-index: 9999;
+        transition: width 0.1s ease;
+    `;
+    document.body.appendChild(progressBar);
+    
+    window.addEventListener('scroll', function() {
+        const scrollTop = window.pageYOffset;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const scrollPercent = (scrollTop / docHeight) * 100;
+        progressBar.style.width = scrollPercent + '%';
+    });
+}
+
+// Initialize scroll progress
+initScrollProgress();
+
+// Text reveal animation on scroll
+function initTextReveal() {
+    gsap.utils.toArray('.section-subtitle').forEach(text => {
+        gsap.fromTo(text, {
+            opacity: 0,
+            y: 20
+        }, {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: text,
+                start: "top 80%",
+                end: "bottom 20%",
+                toggleActions: "play none none reverse"
+            }
+        });
+    });
+}
+
+// Initialize text reveal
+initTextReveal();
+
+// Page visibility API for performance
+document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+        // Pause animations when page is not visible
+        gsap.globalTimeline.pause();
+    } else {
+        // Resume animations when page is visible
+        gsap.globalTimeline.resume();
+    }
+});
+
+// Resize handler for responsive animations
+window.addEventListener('resize', function() {
+    ScrollTrigger.refresh();
+});
+
+// Custom cursor effect (optional)
+function initCustomCursor() {
+    const cursor = document.createElement('div');
+    cursor.style.cssText = `
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        background: radial-gradient(circle, #ffd700 0%, #b8860b 100%);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 9999;
+        opacity: 0;
+        transform: translate(-50%, -50%);
+        transition: opacity 0.3s ease;
+    `;
+    document.body.appendChild(cursor);
+    
+    document.addEventListener('mousemove', function(e) {
+        gsap.to(cursor, {
+            x: e.clientX,
+            y: e.clientY,
+            duration: 0.1,
+            ease: "power2.out"
+        });
+    });
+    
+    document.addEventListener('mouseenter', function() {
+        cursor.style.opacity = '0.6';
+    });
+    
+    document.addEventListener('mouseleave', function() {
+        cursor.style.opacity = '0';
+    });
+}
+
+// Initialize custom cursor on desktop
+if (window.innerWidth > 768) {
+    initCustomCursor();
+}
+
+// Performance optimization
+gsap.config({
+    force3D: true,
+    nullTargetWarn: false
+});
+
+// Set high performance mode for ScrollTrigger
+ScrollTrigger.config({
+    limitCallbacks: true,
+    ignoreMobileResize: true
+});
