@@ -1,5 +1,5 @@
 // Register GSAP plugins
-gsap.registerPlugin(ScrollTrigger, TextPlugin);
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, TextPlugin);
 
 // Global variables
 let isLoaded = false;
@@ -14,7 +14,27 @@ document.addEventListener('DOMContentLoaded', function() {
     initCounters();
     initContactForm();
     initParallax();
+    handleInitialHash();
 });
+
+// Handle initial hash navigation
+function handleInitialHash() {
+    if (window.location.hash) {
+        const targetId = window.location.hash.substring(1);
+        const targetElement = document.getElementById(targetId);
+        
+        if (targetElement) {
+            // Wait for page to load completely
+            setTimeout(() => {
+                const offsetTop = targetElement.offsetTop - 70;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        }
+    }
+}
 
 // Loading Screen Animation
 function initLoader() {
@@ -87,25 +107,41 @@ function initNavigation() {
     });
     
     // Active navigation link
-    const sections = document.querySelectorAll('section');
+    const sections = document.querySelectorAll('section[id]');
+    const navigationLinks = document.querySelectorAll('.nav-link');
     
-    window.addEventListener('scroll', function() {
+    function updateActiveNavigation() {
         let current = '';
+        const scrollPosition = window.scrollY + 100; // Offset for navbar height
+        
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            if (scrollY >= (sectionTop - 200)) {
+            const sectionBottom = sectionTop + section.offsetHeight;
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
                 current = section.getAttribute('id');
             }
         });
         
-        navLinks.forEach(link => {
+        // If we're at the very top, highlight home
+        if (window.scrollY < 100) {
+            current = 'home';
+        }
+        
+        navigationLinks.forEach(link => {
             link.classList.remove('active');
-            if (link.getAttribute('href') === '#' + current) {
+            const href = link.getAttribute('href');
+            if (href === '#' + current) {
                 link.classList.add('active');
             }
         });
-    });
+    }
+    
+    // Update on scroll
+    window.addEventListener('scroll', updateActiveNavigation);
+    
+    // Update on load
+    updateActiveNavigation();
 }
 
 // Smooth scrolling for navigation links
@@ -121,11 +157,28 @@ function initSmoothScroll() {
             if (targetElement) {
                 const offsetTop = targetElement.offsetTop - 70;
                 
-                gsap.to(window, {
-                    duration: 1,
-                    scrollTo: { y: offsetTop, autoKill: false },
-                    ease: "power2.inOut"
-                });
+                // Close mobile menu if open
+                const hamburger = document.getElementById('hamburger');
+                const navMenu = document.getElementById('nav-menu');
+                if (hamburger && navMenu) {
+                    hamburger.classList.remove('active');
+                    navMenu.classList.remove('active');
+                }
+                
+                // Try GSAP ScrollTo first, fallback to native smooth scroll
+                if (gsap && gsap.plugins && gsap.plugins.ScrollToPlugin) {
+                    gsap.to(window, {
+                        duration: 1,
+                        scrollTo: { y: offsetTop, autoKill: false },
+                        ease: "power2.inOut"
+                    });
+                } else {
+                    // Fallback to native smooth scrolling
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
             }
         });
     });
