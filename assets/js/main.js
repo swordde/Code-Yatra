@@ -464,11 +464,30 @@ function initContactForm() {
         return;
     }
     
-    // Initialize EmailJS with obfuscated keys for basic security
+    // Initialize EmailJS with your actual credentials
     const emailConfig = {
-        pk: ['6z2n46iy', 'LDeBue3wD', 'hyouractualEmailJS', 'spublickey'].join(''),
-        sid: ['service_', 'bh1k', 'f2ne'].join(''),
-        tid: ['template_', 'u9ic', 'ttz'].join('')
+        pk: '6z2n46iyLDeBue3wD',
+        sid: 'service_bh1kf2n',            
+        tid: 'template_8o3axvs'
+    };
+    
+    // Debug function - remove after fixing
+    window.debugEmailJS = function() {
+        console.log('🔍 EmailJS Configuration Debug:');
+        console.log('Public Key:', emailConfig.pk);
+        console.log('Service ID:', emailConfig.sid);
+        console.log('Template ID:', emailConfig.tid);
+        console.log('Current Domain:', window.location.hostname);
+        console.log('EmailJS Loaded:', typeof emailjs !== 'undefined');
+        
+        // Test if EmailJS is properly loaded
+        if (typeof emailjs === 'undefined') {
+            console.error('❌ EmailJS library not loaded! Check your script tag.');
+            return false;
+        }
+        
+        console.log('✅ EmailJS library loaded successfully');
+        return true;
     };
     
     emailjs.init({
@@ -583,21 +602,62 @@ function initContactForm() {
             }, 3000);
         })
         .catch(function(error) {
-            console.log('FAILED...', error);
+            console.error('EmailJS Error Details:', {
+                error: error,
+                status: error.status,
+                text: error.text,
+                publicKey: emailConfig.pk,
+                serviceId: emailConfig.sid,
+                templateId: emailConfig.tid,
+                templateParams: templateParams
+            });
+            
+            // Specific error messages based on status
+            let errorMessage = 'Failed to send message. ';
+            let debugInfo = '';
+            
+            if (error.status === 400) {
+                errorMessage = '⚠️ Configuration Error: Invalid EmailJS setup. ';
+                debugInfo = 'Check your Public Key, Service ID, and Template ID.';
+            } else if (error.status === 401) {
+                errorMessage = '🔐 Authentication Error: Invalid credentials. ';
+                debugInfo = 'Verify your EmailJS Public Key.';
+            } else if (error.status === 403) {
+                errorMessage = '🚫 Access Denied: Domain restrictions. ';
+                debugInfo = 'Check domain restrictions in EmailJS dashboard.';
+            } else if (error.status === 404) {
+                errorMessage = '❓ Not Found: Service or Template not found. ';
+                debugInfo = 'Check your Service ID and Template ID.';
+            } else if (error.status === 429) {
+                errorMessage = '⏰ Rate Limited: Too many requests. ';
+                debugInfo = 'Wait a moment before trying again.';
+            } else {
+                errorMessage = '🌐 Network Error: Connection failed. ';
+                debugInfo = 'Check your internet connection.';
+            }
             
             // Error feedback
-            submitButton.innerHTML = 'Failed to Send ✗';
+            submitButton.innerHTML = 'Send Failed ✗';
             submitButton.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)';
             
-            // Show error message
-            showNotification('Failed to send message. Please try again or contact us directly.', 'error');
+            // Show detailed error message
+            showNotification(errorMessage + debugInfo, 'error');
             
-            // Reset button after 3 seconds
+            // Console log for debugging
+            console.log('🐛 EmailJS Debug Info:', {
+                'Public Key': emailConfig.pk,
+                'Service ID': emailConfig.sid, 
+                'Template ID': emailConfig.tid,
+                'Current Domain': window.location.hostname,
+                'Template Data': templateParams
+            });
+            
+            // Reset button after 5 seconds for errors
             setTimeout(() => {
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
                 submitButton.style.background = '';
-            }, 3000);
+            }, 5000);
         });
     });
     
