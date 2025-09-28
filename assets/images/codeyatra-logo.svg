@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Black circular background -->
+  <circle cx="200" cy="200" r="200" fill="#000000"/>
+  
+  <!-- White code brackets -->
+  <text x="200" y="150" font-family="Courier New, monospace" font-size="60" fill="#ffffff" text-anchor="middle" font-weight="bold">&lt;/&gt;</text>
+  
+  <!-- CodeYatra text -->
+  <text x="200" y="280" font-family="Arial, sans-serif" font-size="48" fill="#ffffff" text-anchor="middle" font-weight="bold">CodeYatra</text>
+</svg>

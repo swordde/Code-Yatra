@@ -156,6 +156,18 @@ body {
 .nav-logo a {
     text-decoration: none;
     color: var(--primary-color);
+    display: flex;
+    align-items: center;
+}
+
+.nav-logo-image {
+    height: 40px;
+    width: 40px;
+    transition: var(--transition-normal);
+}
+
+.nav-logo-image:hover {
+    transform: scale(1.1);
 }
 
 .logo-container {
@@ -168,7 +180,7 @@ body {
 .logo-symbol {
     font-size: 1.2rem;
     font-weight: var(--font-weight-bold);
-    color: var(--accent-color);
+    color: var(--primary-color);
     font-family: 'Courier New', monospace;
 }
 
@@ -1189,4 +1201,96 @@ section {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
+}
+
+/* Notification Styles */
+.notification {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.notification-success {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+    box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
+}
+
+.notification-error {
+    background: linear-gradient(135deg, #f44336 0%, #da190b 100%) !important;
+    box-shadow: 0 8px 32px rgba(244, 67, 54, 0.3);
+}
+
+.notification-message {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.notification-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+/* Enhanced Contact Form Styles */
+.contact-form {
+    position: relative;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+    transform: scale(1.02);
+}
+
+.form-group input:valid,
+.form-group textarea:valid {
+    border-color: rgba(76, 175, 80, 0.5);
+}
+
+.form-group input:invalid:not(:placeholder-shown),
+.form-group textarea:invalid:not(:placeholder-shown) {
+    border-color: rgba(244, 67, 54, 0.5);
+}
+
+/* Submit button enhancements */
+.contact .btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.contact .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 215, 0, 0.3);
+}
+
+/* Loading animation for submit button */
+.btn-loading {
+    position: relative;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
 }

@@ -1,0 +1,25 @@
+{
+  "name": "CodeYatra - Your Coding Journey",
+  "short_name": "CodeYatra",
+  "description": "Modern portfolio showcasing web development skills with stunning animations and responsive design",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FFD700",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/images/codeyatra-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/code_yatra.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["portfolio", "development", "technology"],
+  "lang": "en"
+}

@@ -455,17 +455,90 @@ function initCounters() {
 
 // Contact form functionality
 function initContactForm() {
+    // Security: Domain verification - only allow from your domain
+    const allowedDomains = ['localhost', '127.0.0.1', 'your-domain.com', 'codeyatra.com'];
+    const currentDomain = window.location.hostname;
+    
+    if (!allowedDomains.includes(currentDomain) && !currentDomain.includes('github.io')) {
+        console.warn('EmailJS blocked: Unauthorized domain');
+        return;
+    }
+    
+    // Initialize EmailJS with obfuscated keys for basic security
+    const emailConfig = {
+        pk: ['6z2n46iy', 'LDeBue3wD', 'hyouractualEmailJS', 'spublickey'].join(''),
+        sid: ['service_', 'bh1k', 'f2ne'].join(''),
+        tid: ['template_', 'u9ic', 'ttz'].join('')
+    };
+    
+    emailjs.init({
+        publicKey: emailConfig.pk,
+        blockHeadless: true, // Security: Block headless browsers
+        blockList: {
+            list: ['foo@emailjs.com', 'bar@emailjs.com'], // Block specific emails if needed
+        },
+        limitRate: {
+            throttle: 10000, // Security: 10 second throttle between requests
+        }
+    });
+    
     const contactForm = document.getElementById('contactForm');
     
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        // Security: Rate limiting check
+        const lastSubmission = localStorage.getItem('lastEmailSubmission');
+        const now = Date.now();
+        const cooldownTime = 60000; // 1 minute cooldown
+        
+        if (lastSubmission && (now - parseInt(lastSubmission)) < cooldownTime) {
+            showNotification('Please wait a moment before sending another message.', 'error');
+            return;
+        }
+        
         // Get form data
         const formData = new FormData(contactForm);
-        const formObject = {};
-        formData.forEach((value, key) => {
-            formObject[key] = value;
-        });
+        
+        // Security: Input validation and sanitization
+        const name = formData.get('name')?.trim().substring(0, 100);
+        const email = formData.get('email')?.trim().toLowerCase().substring(0, 100);
+        const subject = formData.get('subject')?.trim().substring(0, 200);
+        const message = formData.get('message')?.trim().substring(0, 1000);
+        
+        // Security: Basic validation
+        if (!name || !email || !subject || !message) {
+            showNotification('Please fill in all fields.', 'error');
+            return;
+        }
+        
+        // Security: Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showNotification('Please enter a valid email address.', 'error');
+            return;
+        }
+        
+        // Security: Content filtering (basic spam detection)
+        const spamKeywords = ['viagra', 'casino', 'lottery', 'winner', 'congratulations', 'urgent'];
+        const contentToCheck = (name + ' ' + subject + ' ' + message).toLowerCase();
+        if (spamKeywords.some(keyword => contentToCheck.includes(keyword))) {
+            showNotification('Message contains suspicious content.', 'error');
+            return;
+        }
+        
+        const templateParams = {
+            from_name: name,
+            from_email: email,
+            subject: subject,
+            message: message,
+            to_name: 'Code Yatra Team',
+            website_url: window.location.href, // Security: Track source
+            timestamp: new Date().toISOString(), // Security: Add timestamp
+            user_agent: navigator.userAgent.substring(0, 200), // Security: Track browser
+            ip_info: 'Client-side (hidden)', // Security note
+            security_token: btoa(Date.now() + Math.random()).substring(0, 16) // Basic token
+        };
         
         // Animate submit button
         const submitButton = contactForm.querySelector('button[type="submit"]');
@@ -482,19 +555,50 @@ function initContactForm() {
         submitButton.innerHTML = 'Sending...';
         submitButton.disabled = true;
         
-        // Simulate form submission
-        setTimeout(() => {
-            submitButton.innerHTML = 'Message Sent! ✓';
-            submitButton.style.background = 'linear-gradient(135deg, #06d6a0 0%, #118ab2 100%)';
+        // Send email using EmailJS with obfuscated IDs
+        emailjs.send(
+            emailConfig.sid,
+            emailConfig.tid,
+            templateParams
+        )
+        .then(function(response) {
+            console.log('SUCCESS!', response.status, response.text);
             
-            // Reset form after 2 seconds
+            // Security: Store successful submission timestamp
+            localStorage.setItem('lastEmailSubmission', now.toString());
+            
+            // Success feedback
+            submitButton.innerHTML = 'Message Sent! ✓';
+            submitButton.style.background = 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)';
+            
+            // Show success message
+            showNotification('Message sent successfully! We\'ll get back to you soon.', 'success');
+            
+            // Reset form after 3 seconds
             setTimeout(() => {
                 contactForm.reset();
                 submitButton.innerHTML = originalText;
                 submitButton.disabled = false;
                 submitButton.style.background = '';
-            }, 2000);
-        }, 1500);
+            }, 3000);
+        })
+        .catch(function(error) {
+            console.log('FAILED...', error);
+            
+            // Error feedback
+            submitButton.innerHTML = 'Failed to Send ✗';
+            submitButton.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)';
+            
+            // Show error message
+            showNotification('Failed to send message. Please try again or contact us directly.', 'error');
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+                submitButton.style.background = '';
+            }, 3000);
+        });
     });
     
     // Form field animations
@@ -517,6 +621,89 @@ function initContactForm() {
             });
         });
     });
+}
+
+// Notification function for user feedback
+function showNotification(message, type) {
+    // Remove existing notification if any
+    const existingNotification = document.querySelector('.notification');
+    if (existingNotification) {
+        existingNotification.remove();
+    }
+    
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-message">${message}</span>
+            <button class="notification-close">&times;</button>
+        </div>
+    `;
+    
+    // Add to body
+    document.body.appendChild(notification);
+    
+    // Style the notification
+    Object.assign(notification.style, {
+        position: 'fixed',
+        top: '20px',
+        right: '20px',
+        backgroundColor: type === 'success' ? '#4CAF50' : '#f44336',
+        color: 'white',
+        padding: '15px 20px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        zIndex: '10000',
+        maxWidth: '400px',
+        transform: 'translateX(100%)',
+        transition: 'transform 0.3s ease-in-out',
+        fontFamily: "'Poppins', sans-serif"
+    });
+    
+    // Style notification content
+    const content = notification.querySelector('.notification-content');
+    Object.assign(content.style, {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: '15px'
+    });
+    
+    // Style close button
+    const closeBtn = notification.querySelector('.notification-close');
+    Object.assign(closeBtn.style, {
+        background: 'none',
+        border: 'none',
+        color: 'white',
+        fontSize: '20px',
+        cursor: 'pointer',
+        padding: '0',
+        width: '20px',
+        height: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+    });
+    
+    // Animate in
+    setTimeout(() => {
+        notification.style.transform = 'translateX(0)';
+    }, 10);
+    
+    // Close functionality
+    closeBtn.addEventListener('click', () => {
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => notification.remove(), 300);
+    });
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
 }
 
 // Parallax effects
