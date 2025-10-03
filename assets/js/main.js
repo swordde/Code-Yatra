@@ -188,40 +188,34 @@ function initSmoothScroll() {
 function initHeroAnimations() {
     const heroTimeline = gsap.timeline();
     
-    // Animate hero logo and text elements
+    // Animate hero elements
     heroTimeline
-        .from('.hero-logo-symbol', {
-            duration: 1.2,
+        .from('.hero-main-heading', {
+            duration: 1,
             y: 50,
             opacity: 0,
-            scale: 0.8,
-            ease: "back.out(1.7)"
-        })
-        .from('.hero-logo-text', {
-            duration: 1,
-            y: 30,
-            opacity: 0,
             ease: "power3.out"
-        }, "-=0.6")
-        .from('.subtitle-line', {
-            duration: 0.8,
+        })
+        .from('.hero-image-container', {
+            duration: 1.2,
             y: 30,
             opacity: 0,
-            stagger: 0.2,
-            ease: "power2.out"
-        }, "-=0.4")
+            scale: 0.95,
+            ease: "power2.out",
+            clearProps: "all"
+        }, "-=0.5")
         .from('.hero-description', {
             duration: 0.8,
             y: 30,
             opacity: 0,
             ease: "power2.out"
-        }, "-=0.3")
+        }, "-=0.6")
         .from('.hero-buttons', {
             duration: 0.8,
             y: 30,
             opacity: 0,
             ease: "power2.out"
-        }, "-=0.3")
+        }, "-=0.4")
         .from('.code-animation', {
             duration: 1,
             scale: 0.8,
