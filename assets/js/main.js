@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initContactForm();
     initParallax();
     handleInitialHash();
+    initCodeAnimation();
 });
 
 // Handle initial hash navigation
@@ -991,3 +992,68 @@ ScrollTrigger.config({
     limitCallbacks: true,
     ignoreMobileResize: true
 });
+function initCodeAnimation() {
+    const codeSnippets = [
+        [{text: 'function', type: 'keyword'}, {text: ' '}, {text: 'codeYatra', type: 'function'}, {text: '() {'}],
+        [{text: '  '}, {text: 'return', type: 'keyword'}, {text: ' '}, {text: '"Amazing experiences"', type: 'string'}, {text: ';'}],
+        [{text: '};'}],
+        [{text: 'const', type: 'keyword'}, {text: ' buildWebsite = () => {'}],
+        [{text: '  '}, {text: 'return', type: 'keyword'}, {text: ' '}, {text: '"Modern & Responsive"', type: 'string'}, {text: ';'}],
+        [{text: '};'}],
+        [{text: 'async', type: 'keyword'}, {text: ' '}, {text: 'function', type: 'keyword'}, {text: ' '}, {text: 'createApp', type: 'function'}, {text: '() {'}],
+        [{text: '  '}, {text: 'await', type: 'keyword'}, {text: ' '}, {text: 'deploy', type: 'function'}, {text: '('}, {text: '"production"', type: 'string'}, {text: ');'}],
+        [{text: '}'}],
+        [{text: 'class', type: 'keyword'}, {text: ' DigitalMarketing {'}],
+        [{text: '  '}, {text: 'boostSEO', type: 'function'}, {text: '() { '}, {text: 'return', type: 'keyword'}, {text: ' '}, {text: '"Top Rankings"', type: 'string'}, {text: '; }'}],
+        [{text: '}'}],
+        [{text: 'const', type: 'keyword'}, {text: ' cloudDeploy = '}, {text: 'async', type: 'keyword'}, {text: ' () => {'}],
+        [{text: '  '}, {text: 'return', type: 'keyword'}, {text: ' '}, {text: '"AWS/Azure/GCP"', type: 'string'}, {text: ';'}],
+        [{text: '};'}],
+        [{text: 'function', type: 'keyword'}, {text: ' '}, {text: 'innovate', type: 'function'}, {text: '() {'}],
+        [{text: '  '}, {text: 'return', type: 'keyword'}, {text: ' '}, {text: '"Build. Create. Grow."', type: 'string'}, {text: ';'}],
+        [{text: '};'}]
+    ];
+
+    const snippetGroups = [[0,1,2], [3,4,5], [6,7,8], [9,10,11], [12,13,14], [15,16,17]];
+    let groupIndex = 0;
+    const [line1, line2, line3] = ['.line1', '.line2', '.line3'].map(s => document.querySelector('.code-line' + s));
+
+    if (!line1) return;
+
+    const buildLineText = tokens => tokens.map(t => t.text).join('');
+
+    function typeLinePlain(el, text, idx, onDone) {
+        if (idx >= text.length) return onDone();
+        el.textContent = text.substring(0, idx + 1);
+        setTimeout(() => typeLinePlain(el, text, idx + 1, onDone), 30);
+    }
+
+    function colorize(el, tokens) {
+        el.innerHTML = '';
+        tokens.forEach(t => {
+            const span = document.createElement('span');
+            if (t.type) span.className = t.type === 'function' ? 'function-name' : t.type;
+            span.textContent = t.text;
+            el.appendChild(span);
+        });
+    }
+
+    function animate() {
+        const [i1, i2, i3] = snippetGroups[groupIndex];
+        [line1, line2, line3].forEach(l => l.textContent = '');
+
+        typeLinePlain(line1, buildLineText(codeSnippets[i1]), 0, () => {
+            colorize(line1, codeSnippets[i1]);
+            typeLinePlain(line2, buildLineText(codeSnippets[i2]), 0, () => {
+                colorize(line2, codeSnippets[i2]);
+                typeLinePlain(line3, buildLineText(codeSnippets[i3]), 0, () => {
+                    colorize(line3, codeSnippets[i3]);
+                    groupIndex = (groupIndex + 1) % snippetGroups.length;
+                    setTimeout(animate, 2000);
+                });
+            });
+        });
+    }
+
+    setTimeout(animate, 500);
+}
